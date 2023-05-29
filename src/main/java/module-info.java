@@ -5,4 +5,6 @@ module com.example.rsa {
 
     opens com.example.rsa to javafx.fxml;
     exports com.example.rsa;
+    exports com.example.rsa.controller;
+    opens com.example.rsa.controller to javafx.fxml;
 }
