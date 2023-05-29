@@ -5,13 +5,12 @@
     -fx-control-inner-background: #2b2b2b;
     -fx-text-fill: white;
 }
-.text-area .content {
+.text-area {
     -fx-background-color: #2b2b2b;
-    -fx-background-insets: 0;
-    -fx-background-radius: 0;
-    -fx-border-color: #2b2b2b;
-    -fx-border-width: 0;
-    -fx-padding: 0;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-width: 2;
+    -fx-border-color: #c6c6c6;
 }
 .text-field {
     -fx-background-color: #2b2b2b;
@@ -48,4 +47,11 @@
 
 .tab-pane .tab .focus-indicator:visited {
     -fx-border-color: white;
+}
+
+.text-area .viewport{
+    -fx-background-color: transparent;
+}
+.text-area .content{
+    -fx-background-color: transparent;
 }

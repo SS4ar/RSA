@@ -12,6 +12,7 @@ public class RsaApplication extends javafx.application.Application {
         FXMLLoader fxmlLoader = new FXMLLoader(RsaApplication.class.getResource("rsa-view.fxml"));
         Parent root = fxmlLoader.load();
 
+
         // Установка стилей для корневого контейнера
         root.setStyle("-fx-background-color: #555555; -fx-text-fill: white;");
 
