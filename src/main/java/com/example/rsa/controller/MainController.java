@@ -151,7 +151,7 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    void encryptText() throws Exception {
+    void encryptString() throws Exception {
         if(publicKeyPath.getText().isEmpty()){
             encryptedTextField.setText("Отсутствует публичный ключ для шифрования");
             return;
@@ -172,7 +172,7 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    void decryptMessage() throws Exception {
+    void decryptString() throws Exception {
         if(privateKeyPath.getText().isEmpty()){
             decryptedText.setText("Отсутствует приватный ключ для дешифровки");
             return;
@@ -193,7 +193,7 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    void cryptDocument() throws Exception {
+    void encryptDocument() throws Exception {
         if(openKeyPath.getText().isEmpty()){
             cryptStatus.setText("Отсутствует файл открытого ключа!");
             return;
