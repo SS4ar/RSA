@@ -12,17 +12,12 @@ public class RsaApplication extends javafx.application.Application {
         FXMLLoader fxmlLoader = new FXMLLoader(RsaApplication.class.getResource("rsa-view.fxml"));
         Parent root = fxmlLoader.load();
 
-
-        // Установка стилей для корневого контейнера
-        root.setStyle("-fx-background-color: #555555; -fx-text-fill: white;");
-
         // Создание сцены с корневым контейнером
         Scene scene = new Scene(root);
 
-        // Установка стилей для сцены (если необходимо)
-        // scene.setFill(Color.DARKGRAY);
 
         stage.setTitle("RSA-App");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }

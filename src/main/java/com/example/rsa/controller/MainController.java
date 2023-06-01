@@ -13,11 +13,10 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
+import java.security.*;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -25,14 +24,15 @@ public class MainController implements Initializable {
 
     CipherFuncs cipherFuncs;
 
-    @FXML
-    private Button cryptDocumentBtn;
+    PrivateKey privateKey;
+
+    PublicKey publicKey;
 
     @FXML
     private Label cryptStatus;
 
     @FXML
-    private Button decryptDocumentBtn;
+    private Label saveKeyStatus;
 
     @FXML
     private Label decryptStatus;
@@ -44,19 +44,13 @@ public class MainController implements Initializable {
     private TextField docFilePath;
 
     @FXML
-    private Button docToVerifyBtn;
-
-    @FXML
     private TextField documentToCryptPath;
 
     @FXML
     private TextField documentToDecryptPath;
 
     @FXML
-    private Button documentToSignBtn;
-
-    @FXML
-    private TextField doumentToSignPath;
+    private TextField documentToSignPath;
 
     @FXML
     private TextField encryptedBase64Text;
@@ -65,16 +59,7 @@ public class MainController implements Initializable {
     private TextField encryptedTextField;
 
     @FXML
-    private Button openkeyFileBtn;
-
-    @FXML
-    private TextField openkeyPath;
-
-    @FXML
-    private Button privateKeyBtn;
-
-    @FXML
-    private Button privateKeyForSignBtn;
+    private TextField openKeyPath;
 
     @FXML
     private TextField privateKeyForSignPath;
@@ -86,22 +71,10 @@ public class MainController implements Initializable {
     private TextField pubKeyPath;
 
     @FXML
-    private Button publicKeyFileBtn;
-
-    @FXML
-    private Button publicKeyForVerifyBtn;
-
-    @FXML
     private TextField publicKeyPath;
 
     @FXML
-    private Button secretKeyBtn;
-
-    @FXML
-    private TextField secretkeyPath;
-
-    @FXML
-    private Button sigFileBtn;
+    private TextField secretKeyPath;
 
     @FXML
     private TextField sigFilePath;
@@ -118,6 +91,12 @@ public class MainController implements Initializable {
     @FXML
     private Label clipboardStatus;
 
+    @FXML
+    private TextArea privateKeyTextArea;
+
+    @FXML
+    private TextArea publicKeyTextArea;
+
 
     @FXML
     void chooseFile(ActionEvent event) {
@@ -132,22 +111,47 @@ public class MainController implements Initializable {
         Button btn = (Button) event.getSource();
 
         switch (btn.getId()){
-            case "openkeyFileBtn" -> openkeyPath.setText(file.getAbsolutePath());
-            case "secretKeyBtn" -> secretkeyPath.setText(file.getAbsolutePath());
+            case "openKeyFileBtn" -> openKeyPath.setText(file.getAbsolutePath());
+            case "secretKeyBtn" -> secretKeyPath.setText(file.getAbsolutePath());
             case "cryptDocumentBtn" -> documentToCryptPath.setText(file.getAbsolutePath());
             case "decryptDocumentBtn" -> documentToDecryptPath.setText(file.getAbsolutePath());
             case "publicKeyFileBtn" -> publicKeyPath.setText(file.getAbsolutePath());
             case "privateKeyBtn" -> privateKeyPath.setText(file.getAbsolutePath());
-            case "documentToSignBtn" -> doumentToSignPath.setText(file.getAbsolutePath());
+            case "documentToSignBtn" -> documentToSignPath.setText(file.getAbsolutePath());
             case "privateKeyForSignBtn" -> privateKeyForSignPath.setText(file.getAbsolutePath());
             case "sigFileBtn" -> sigFilePath.setText(file.getAbsolutePath());
             case "docToVerifyBtn" -> docFilePath.setText(file.getAbsolutePath());
             case "publicKeyForVerifyBtn" -> pubKeyPath.setText(file.getAbsolutePath());
         }
     }
+    @FXML
+    void generateKeys() throws NoSuchAlgorithmException{
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        keyPairGenerator.initialize(2048);
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+
+        publicKey = keyPair.getPublic();
+        privateKey = keyPair.getPrivate();
+        byte[] formattedPublicKey = cipherFuncs.getPEMFormattedKey(publicKey.getEncoded(), "PUBLIC KEY");
+        byte[] formattedPrivateKey = cipherFuncs.getPEMFormattedKey(privateKey.getEncoded(), "PRIVATE KEY");
+        publicKeyTextArea.setText(new String(formattedPublicKey));
+        privateKeyTextArea.setText(new String(formattedPrivateKey));
+    }
 
     @FXML
-    void encryptText(ActionEvent event) throws GeneralSecurityException, IOException {
+    void savePrivateKey() throws  IOException{
+        cipherFuncs.savePrivateKey(privateKey, "private.pem");
+        saveKeyStatus.setText("Закрытый ключ успешно сохранен");
+    }
+
+    @FXML
+    void savePublicKey() throws IOException {
+        cipherFuncs.savePublicKey(publicKey, "public.pem");
+        saveKeyStatus.setText("Открытый ключ успешно сохранен");
+    }
+
+    @FXML
+    void encryptText() throws Exception {
         if(publicKeyPath.getText().isEmpty()){
             encryptedTextField.setText("Отсутствует публичный ключ для шифрования");
             return;
@@ -168,7 +172,7 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    void decryptMessage(ActionEvent event) throws GeneralSecurityException, IOException {
+    void decryptMessage() throws Exception {
         if(privateKeyPath.getText().isEmpty()){
             decryptedText.setText("Отсутствует приватный ключ для дешифровки");
             return;
@@ -189,8 +193,8 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    void cryptDocument(ActionEvent event) throws IOException, GeneralSecurityException {
-        if(openkeyPath.getText().isEmpty()){
+    void cryptDocument() throws Exception {
+        if(openKeyPath.getText().isEmpty()){
             cryptStatus.setText("Отсутствует файл открытого ключа!");
             return;
         }
@@ -201,7 +205,7 @@ public class MainController implements Initializable {
         }
 
         File documentToEncrypt = new File(documentToCryptPath.getText());
-        File openKey = new File(openkeyPath.getText());
+        File openKey = new File(openKeyPath.getText());
 
         cipherFuncs.encryptDocument(documentToEncrypt, openKey);
 
@@ -209,8 +213,8 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    void decryptDocument(ActionEvent event) throws GeneralSecurityException, IOException {
-        if(secretkeyPath.getText().isEmpty()){
+    void decryptDocument() throws Exception {
+        if(secretKeyPath.getText().isEmpty()){
             decryptStatus.setText("Отсутствует файл закрытого ключа!");
             return;
         }
@@ -221,7 +225,7 @@ public class MainController implements Initializable {
         }
 
         File documentToDecrypt = new File(documentToDecryptPath.getText());
-        File privateKey = new File(secretkeyPath.getText());
+        File privateKey = new File(secretKeyPath.getText());
 
         cipherFuncs.decryptDocument(documentToDecrypt, privateKey);
 
@@ -229,8 +233,8 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    public void sign(ActionEvent event) throws GeneralSecurityException, IOException {
-        if(doumentToSignPath.getText().isEmpty()){
+    public void sign() throws Exception {
+        if(documentToSignPath.getText().isEmpty()){
             singStatus.setText("Отсутствует документ для подписи");
             return;
         }
@@ -240,7 +244,7 @@ public class MainController implements Initializable {
             return;
         }
 
-        File documentForSign = new File(doumentToSignPath.getText());
+        File documentForSign = new File(documentToSignPath.getText());
 
         File privateKeyFile = new File(privateKeyForSignPath.getText());
 
@@ -250,7 +254,7 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    public void verify(ActionEvent event) throws GeneralSecurityException, IOException {
+    public void verify() throws Exception {
         if(pubKeyPath.getText().isEmpty()){
             verifyStatus.setText("Отсутствует публичный ключ");
             return;
@@ -280,7 +284,7 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    public void copyToClipboard(ActionEvent event) {
+    public void copyToClipboard() {
         if (encryptedTextField.getText().isEmpty()){
             clipboardStatus.setText("Вывод пуст");
             return;
