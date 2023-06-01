@@ -13,21 +13,21 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class CipherFuncs {
-    public String encryptMessage(String message, File publicKeyFile) throws IOException, GeneralSecurityException, Exception{
+    public String encryptMessage(String message, File publicKeyFile) throws Exception{
         PublicKey publicKey = loadPublicKey(publicKeyFile.getPath());
         byte[] encryptedBytes = encrypt(message.getBytes(), publicKey);
         return Base64.getEncoder().encodeToString(encryptedBytes);
 
     }
 
-    public String decryptMessage(String message, File privateKeyFile) throws IOException, GeneralSecurityException, Exception{
+    public String decryptMessage(String message, File privateKeyFile) throws Exception{
         PrivateKey privateKey = loadPrivateKey(privateKeyFile.getPath());
         byte[] encryptedBytes = Base64.getDecoder().decode(message);
         byte[] decryptedBytes = decrypt(encryptedBytes, privateKey);
         return new String(decryptedBytes);
     }
 
-    public void encryptDocument(File document, File openKey) throws IOException, GeneralSecurityException, Exception{
+    public void encryptDocument(File document, File openKey) throws Exception{
         PublicKey publicKey = loadPublicKey(openKey.getPath());
         byte[] documentBytes = Files.readAllBytes(document.toPath());
         byte[] encryptedBytes = encrypt(documentBytes, publicKey);
@@ -36,7 +36,7 @@ public class CipherFuncs {
         Files.write(encryptedFilePath, encryptedBytes, StandardOpenOption.CREATE);
     }
 
-    public void decryptDocument(File document, File secretKey) throws IOException, GeneralSecurityException, Exception{
+    public void decryptDocument(File document, File secretKey) throws Exception{
         PrivateKey privateKey = loadPrivateKey(secretKey.getPath());
         byte[] encryptedBytes = Files.readAllBytes(document.toPath());
         byte[] decryptedBytes = decrypt(encryptedBytes, privateKey);
@@ -79,8 +79,7 @@ public class CipherFuncs {
         BigInteger d = ((java.security.interfaces.RSAPrivateKey) privateKey).getPrivateExponent();
         BigInteger encryptedValue = new BigInteger(encryptedBytes);
         BigInteger decryptedValue = encryptedValue.modPow(d, n);
-        byte[] decryptedBytes = decryptedValue.toByteArray();
-        return decryptedBytes;
+        return decryptedValue.toByteArray();
     }
 
     public static PublicKey loadPublicKey(String publicKeyPath) throws Exception {
